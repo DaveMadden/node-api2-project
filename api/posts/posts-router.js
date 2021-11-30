@@ -7,7 +7,7 @@ const router = express.Router()
 router.get('/', (req,res)=>{
     Post.find()
         .then(posts => {
-            // throw new Error("REKT");
+            // throw new Error("RE");
             res.status(200).json(posts);
         })
         .catch(error=>{
