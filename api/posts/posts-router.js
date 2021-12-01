@@ -39,14 +39,17 @@ router.get('/:id', async (req,res) => {
 //CREATE NEW POST
 router.post('/', (req,res)=>{
 
+    const newPost = req.body;
+
     if (!req.body.title || !req.body.contents){
         res.status(400).json({
             message: "Please provide title and contents for the post"
         })
     } else {
         Post.insert(req.body)
-            .then(blogpost => {
-                res.status(201).json(blogpost);
+            .then(response => {
+                newPost.id = response.id
+                res.status(201).json(newPost);
             })
             .catch(err => {
                 res.status(500).json({
@@ -58,12 +61,20 @@ router.post('/', (req,res)=>{
 
 //UPDATE POST BY (ID)
 router.put('/:id', async (req,res)=>{
+
+    const uPost = req.body;
+    uPost.id = Number(req.params.id);
     try {
         if(!req.body.title || !req.body.contents){
             res.status(400).json({message: "Please provide title and contents for the post"})
         } else {
             const updatedPost = await Post.update(req.params.id, req.body)
-            res.status(201).json(updatedPost)
+            if (updatedPost){
+                res.status(201).json(uPost)
+            }
+            else{
+                res.status(404).json({ message: "The post with the specified ID does not exist" })
+            }
         }
     }
     catch (error) {
@@ -72,11 +83,13 @@ router.put('/:id', async (req,res)=>{
 })//this returns '1'?
 
 //DELETE POST BY (ID)
-router.delete('/:id', (req,res)=>{
+router.delete('/:id', async (req,res)=>{
+    const toBeGone = await Post.findById(req.params.id);
+
     Post.remove(req.params.id)
         .then(count=>{
             if (count > 0){
-                res.status(200).json({message: "she gone"})
+                res.status(200).json(toBeGone)
             }
             else {
                 res.status(404).json({ message: "The post with the specified ID does not exist" })
